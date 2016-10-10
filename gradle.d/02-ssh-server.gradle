@@ -59,6 +59,7 @@ task dockerInstall << {
     ssh.run {
         session(remotes) {
             execute "curl -sSL https://get.docker.com/ | sh"
+            execute "sudo service docker start"
         }
     }
 }
@@ -98,7 +99,7 @@ task swarmManagerReplicaSetup << {
     }
 }
 
-task swarmAgentsSetup < {
+task swarmAgentsSetup << {
     ssh.run {
         session(remotes.role('swarm-agent')) {
             execute "sudo docker run -d swarm join --advertise=${delegate.getRemote().host}:2375 consul://${remotes.serviceDiscovery01.host}:8500"
