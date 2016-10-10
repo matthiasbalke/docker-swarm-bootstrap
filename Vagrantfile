@@ -24,10 +24,6 @@ Vagrant.configure("2") do |config|
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # config.vm.network "forwarded_port", guest: 80, host: 8080
 
-  # Create a private network, which allows host-only access to the machine
-  # using a specific IP.
-  config.vm.network "private_network", ip: "192.168.33.10"
-
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
   # your network.
@@ -56,7 +52,25 @@ Vagrant.configure("2") do |config|
     # do not use audio
     vb.customize ['modifyvm', :id, '--audio', 'none']
   end
-  #
+
+  config.vm.define "swarmManager01" do |manager|
+    # Create a private network, which allows host-only access to the machine
+    # using a specific IP.
+    manager.vm.network "private_network", ip: "192.168.33.10"
+  end
+
+  config.vm.define "serviceDiscovery01" do |discovery|
+    discovery.vm.network "private_network", ip: "192.168.33.20"
+  end
+
+  config.vm.define "swarmAgent01" do |agent|
+    agent.vm.network "private_network", ip: "192.168.33.30"
+  end
+
+  config.vm.define "swarmAgent02" do |agent|
+    agent.vm.network "private_network", ip: "192.168.33.31"
+  end
+
   # View the documentation for the provider you are using for more
   # information on available options.
 
@@ -70,8 +84,8 @@ Vagrant.configure("2") do |config|
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  # config.vm.provision "shell", inline: <<-SHELL
-  #   apt-get update
-  #   apt-get install -y apache2
-  # SHELL
+  config.vm.provision "shell", inline: <<-SHELL
+    sudo yum -y update
+    sudo yum -y install net-tools
+  SHELL
 end
