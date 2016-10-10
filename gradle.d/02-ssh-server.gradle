@@ -3,5 +3,36 @@ ssh.settings {
 }
 
 remotes {
+    swarmManager01 {
+        host = '192.168.33.10'
+        user =  'vagrant'
+        identity = file('.vagrant/machines/swarmManager01/virtualbox/private_key')
+    }
 
+    serviceDiscovery01 {
+        host = '192.168.33.20'
+        user =  'vagrant'
+        identity = file('.vagrant/machines/serviceDiscovery01/virtualbox/private_key')
+    }
+
+    swarmAgent01 {
+        host = '192.168.33.30'
+        user =  'vagrant'
+        identity = file('.vagrant/machines/swarmAgent01/virtualbox/private_key')
+    }
+
+    swarmAgent02 {
+        host = '192.168.33.31'
+        user =  'vagrant'
+        identity = file('.vagrant/machines/swarmAgent02/virtualbox/private_key')
+    }
+}
+
+
+task hello {
+    ssh.run {
+        session(remotes) {
+            execute "cat /etc/centos-release"
+        }
+    }
 }
