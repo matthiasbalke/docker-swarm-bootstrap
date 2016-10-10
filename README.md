@@ -18,3 +18,11 @@ $ ./gradlew dockerInstall
 ```
 $ ./gradlew dockerCheck
 ```
+
+
+### consul
+
+#### set up service discovery
+```
+$ ./gradlew consulStart
+```

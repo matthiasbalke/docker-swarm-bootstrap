@@ -73,3 +73,12 @@ task dockerCheck << {
         }
     }
 }
+
+task consulStart << {
+    ssh.run {
+        session(remotes.role('service-discovery')) {
+            execute "sudo docker run -d -p 8500:8500 --name=consul progrium/consul -server -bootstrap"
+            execute "sudo docker ps -a"
+        }
+    }
+}
