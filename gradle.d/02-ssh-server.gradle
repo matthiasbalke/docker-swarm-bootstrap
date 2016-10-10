@@ -1,0 +1,7 @@
+ssh.settings {
+    knownHosts = file('gradle.d/known_hosts')
+}
+
+remotes {
+
+}

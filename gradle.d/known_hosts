@@ -1,0 +1,1 @@
+# workaround fuer probleme mit ECDMA host keys https://github.com/int128/gradle-ssh-plugin/issues/55
