@@ -6,8 +6,7 @@ ssh.settings {
 
 remotes {
     swarmManager01 {
-        role 'swarm-manager'
-        role 'primary'
+        role 'swarm-manager-primary'
 
         host = '192.168.33.10'
         user = 'vagrant'
@@ -23,8 +22,7 @@ remotes {
     }
 
     serviceDiscovery01 {
-        role 'service-discovery'
-        role 'primary'
+        role 'service-discovery-primary'
 
         host = '192.168.33.20'
         user = 'vagrant'
@@ -57,7 +55,6 @@ task hello << {
     }
 }
 
-
 task dockerInstall << {
     ssh.run {
         session(remotes) {
@@ -74,11 +71,46 @@ task dockerCheck << {
     }
 }
 
-task consulStart << {
+task consulSetup << {
     ssh.run {
-        session(remotes.role('service-discovery')) {
+        session(remotes.role('service-discovery-primary')) {
             execute "sudo docker run -d -p 8500:8500 --name=consul progrium/consul -server -bootstrap"
             execute "sudo docker ps -a"
         }
     }
+}
+
+task swarmManagerPrimarySetup << {
+    ssh.run {
+        session(remotes.role('swarm-manager-primary')) {
+            execute "sudo docker run -d -p 4000:4000 swarm manage -H :4000 --replication --advertise ${remotes.swarmManager01.host}:4000 consul://${remotes.serviceDiscovery01.host}:8500"
+            execute "sudo docker ps -a"
+        }
+    }
+}
+
+task swarmManagerReplicaSetup << {
+    ssh.run {
+        session(remotes.role('swarm-manager')) {
+            execute "sudo docker run -d -p 4000:4000 swarm manage -H :4000 --replication --advertise ${delegate.getRemote().host}:4000 consul://${remotes.serviceDiscovery01.host}:8500"
+            execute "sudo docker ps -a"
+        }
+    }
+}
+
+task swarmAgentsSetup < {
+    ssh.run {
+        session(remotes.role('swarm-agent')) {
+            execute "sudo docker run -d swarm join --advertise=${delegate.getRemote().host}:2375 consul://${remotes.serviceDiscovery01.host}:8500"
+            execute "sudo docker ps -a"
+        }
+    }
+}
+
+task swarmSetup {
+    mustRunAfter consulSetup
+
+    dependsOn swarmManagerPrimarySetup
+    dependsOn swarmManagerReplicaSetup
+    dependsOn swarmAgentsSetup
 }
