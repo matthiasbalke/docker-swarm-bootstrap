@@ -1,38 +1,67 @@
 ssh.settings {
-    knownHosts = file('gradle.d/known_hosts')
+    // use known_hosts file for production servers
+    // knownHosts = file('gradle.d/known_hosts')
+    knownHosts = allowAnyHosts
 }
 
 remotes {
     swarmManager01 {
+        role 'swarm-manager'
+        role 'primary'
+
         host = '192.168.33.10'
-        user =  'vagrant'
+        user = 'vagrant'
         identity = file('.vagrant/machines/swarmManager01/virtualbox/private_key')
     }
 
     serviceDiscovery01 {
+        role 'service-discovery'
+        role 'primary'
+
         host = '192.168.33.20'
-        user =  'vagrant'
+        user = 'vagrant'
         identity = file('.vagrant/machines/serviceDiscovery01/virtualbox/private_key')
     }
 
     swarmAgent01 {
+        role 'swarm-agent'
+
         host = '192.168.33.30'
-        user =  'vagrant'
+        user = 'vagrant'
         identity = file('.vagrant/machines/swarmAgent01/virtualbox/private_key')
     }
 
     swarmAgent02 {
+        role 'swarm-agent'
+
         host = '192.168.33.31'
-        user =  'vagrant'
+        user = 'vagrant'
         identity = file('.vagrant/machines/swarmAgent02/virtualbox/private_key')
     }
 }
 
 
-task hello {
+task hello << {
     ssh.run {
         session(remotes) {
             execute "cat /etc/centos-release"
+        }
+    }
+}
+
+
+task dockerInstall << {
+    ssh.run {
+        session(remotes) {
+            execute "curl -sSL https://get.docker.com/ | sh"
+        }
+    }
+}
+
+task dockerCheck << {
+    ssh.run {
+        session(remotes) {
+            execute "sudo docker --version"
         }
     }
 }
