@@ -14,6 +14,14 @@ remotes {
         identity = file('.vagrant/machines/swarmManager01/virtualbox/private_key')
     }
 
+    swarmManager02 {
+        role 'swarm-manager'
+
+        host = '192.168.33.11'
+        user = 'vagrant'
+        identity = file('.vagrant/machines/swarmManager02/virtualbox/private_key')
+    }
+
     serviceDiscovery01 {
         role 'service-discovery'
         role 'primary'

@@ -59,6 +59,10 @@ Vagrant.configure("2") do |config|
     manager.vm.network "private_network", ip: "192.168.33.10"
   end
 
+  config.vm.define "swarmManager02" do |manager|
+    manager.vm.network "private_network", ip: "192.168.33.11"
+  end
+
   config.vm.define "serviceDiscovery01" do |discovery|
     discovery.vm.network "private_network", ip: "192.168.33.20"
   end
