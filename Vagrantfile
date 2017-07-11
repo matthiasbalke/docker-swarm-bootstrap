@@ -80,18 +80,18 @@ Vagrant.configure("2") do |config|
   #
   # Run Ansible from the Vagrant Host
   #
-  config.vm.provision "ansible" do |ansible|
-    # Disable default limit to connect to all the machines
-    # ansible.limit = "all"
+#  config.vm.provision "ansible" do |ansible|
+#    # Disable default limit to connect to all the machines
+#    # ansible.limit = "all"
 
-    ansible.playbook = "ntpd.yml"
+#    ansible.playbook = "ntpd.yml"
 
-    ansible.groups = {
-      "manager"               => ["swarm-manager-1"],
-      "worker"                => ["swarm-worker-1", "swarm-worker-2"],
-      "docker-hosts:children" => ["manager", "worker"]
-    }
-  end
+#    ansible.groups = {
+#      "manager"               => ["swarm-manager-1"],
+#      "worker"                => ["swarm-worker-1", "swarm-worker-2"],
+#      "docker-hosts:children" => ["manager", "worker"]
+#    }
+#  end
 
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
