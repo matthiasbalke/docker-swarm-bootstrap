@@ -14,6 +14,22 @@ Vagrant.configure("2") do |config|
   # boxes at https://atlas.hashicorp.com/search.
   config.vm.box = "centos/7"
 
+  config.vm.provider 'virtualbox' do |v|
+    # use linked clones if possible
+    v.linked_clone = true if Gem::Version.new(Vagrant::VERSION) >= Gem::Version.new('1.8.0')
+  end
+
+  config.vm.define "swarm-manager-1" do |manager1|
+    config.vm.network "private_network", ip: "192.168.50.10"
+  end
+
+  config.vm.define "swarm-worker-1" do |worker1|
+    config.vm.network "private_network", ip: "192.168.50.20"
+  end
+
+  config.vm.define "swarm-worker-2" do |worker2|
+    config.vm.network "private_network", ip: "192.168.50.30"
+  end
   # Disable automatic box update checking. If you disable this, then
   # boxes will only be checked for updates when the user runs
   # `vagrant box outdated`. This is not recommended.
@@ -23,6 +39,10 @@ Vagrant.configure("2") do |config|
   # within the machine from a port on the host machine. In the example below,
   # accessing "localhost:8080" will access port 80 on the guest machine.
   # config.vm.network "forwarded_port", guest: 80, host: 8080
+
+  # Create a private network, which allows host-only access to the machine
+  # using a specific IP.
+  # config.vm.network "private_network", ip: "192.168.33.10"
 
   # Create a public network, which generally matched to bridged network.
   # Bridged networks make the machine appear as another physical device on
@@ -39,42 +59,14 @@ Vagrant.configure("2") do |config|
   # backing providers for Vagrant. These expose provider-specific options.
   # Example for VirtualBox:
   #
-  config.vm.provider "virtualbox" do |vb|
-    # Display the VirtualBox GUI when booting the machine
-    vb.gui = false
-
-    # Customize the amount of memory on the VM:
-    vb.memory = "512"
-
-    # save disk space for a lot of VMs, if supported
-    vb.linked_clone = true if Vagrant::VERSION =~ /^1.8/
-
-    # do not use audio
-    vb.customize ['modifyvm', :id, '--audio', 'none']
-  end
-
-  config.vm.define "swarmManager01" do |manager|
-    # Create a private network, which allows host-only access to the machine
-    # using a specific IP.
-    manager.vm.network "private_network", ip: "192.168.33.10"
-  end
-
-  config.vm.define "swarmManager02" do |manager|
-    manager.vm.network "private_network", ip: "192.168.33.11"
-  end
-
-  config.vm.define "serviceDiscovery01" do |discovery|
-    discovery.vm.network "private_network", ip: "192.168.33.20"
-  end
-
-  config.vm.define "swarmAgent01" do |agent|
-    agent.vm.network "private_network", ip: "192.168.33.30"
-  end
-
-  config.vm.define "swarmAgent02" do |agent|
-    agent.vm.network "private_network", ip: "192.168.33.31"
-  end
-
+  # config.vm.provider "virtualbox" do |vb|
+  #   # Display the VirtualBox GUI when booting the machine
+  #   vb.gui = true
+  #
+  #   # Customize the amount of memory on the VM:
+  #   vb.memory = "1024"
+  # end
+  #
   # View the documentation for the provider you are using for more
   # information on available options.
 
@@ -85,11 +77,27 @@ Vagrant.configure("2") do |config|
   #   push.app = "YOUR_ATLAS_USERNAME/YOUR_APPLICATION_NAME"
   # end
 
+  #
+  # Run Ansible from the Vagrant Host
+  #
+  config.vm.provision "ansible" do |ansible|
+    # Disable default limit to connect to all the machines
+    # ansible.limit = "all"
+
+    ansible.playbook = "ntpd.yml"
+
+    ansible.groups = {
+      "manager"               => ["swarm-manager-1"],
+      "worker"                => ["swarm-worker-1", "swarm-worker-2"],
+      "docker-hosts:children" => ["manager", "worker"]
+    }
+  end
+
   # Enable provisioning with a shell script. Additional provisioners such as
   # Puppet, Chef, Ansible, Salt, and Docker are also available. Please see the
   # documentation for more information about their specific syntax and use.
-  config.vm.provision "shell", inline: <<-SHELL
-    sudo yum -y update
-    sudo yum -y install net-tools
-  SHELL
+  # config.vm.provision "shell", inline: <<-SHELL
+  #   apt-get update
+  #   apt-get install -y apache2
+  # SHELL
 end
