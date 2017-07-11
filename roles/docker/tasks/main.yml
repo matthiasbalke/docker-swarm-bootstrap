@@ -1,5 +1,13 @@
 ---
 
+#- name: Uninstall old versions
+#  yum: name={{item}} state=removed
+#  with_items:
+#    - docker
+#    - docker-common
+#    - docker-selinux
+#    - docker-engine
+
 - name: Install Docker Requirements
   yum: name={{item}} state=present
   with_items:
@@ -7,14 +15,22 @@
     - device-mapper-persistent-data
     - lvm2
 
-- name: Add Docker yum repository
+- name: Add Docker yum Repository
   yum_repository:
-    name: docker-ce
-    description: Docker CE
-    baseurl: https://download.docker.com/linux/centos/docker-ce.repo
+    name: docker-ce-stable
+    description: Docker CE Stable - $basearch
+    baseurl: https://download.docker.com/linux/centos/7/$basearch/stable
+    enabled: yes
+    gpgcheck: yes
+    gpgkey: https://download.docker.com/linux/centos/gpg
 
 - name: Install Docker
   yum:
-    name: docker-ce
+    name: docker-ce-17.06.0.ce-1.el7.centos
     state: present
     update_cache: True
+
+- name: Start Docker Service
+  service:
+    name: docker
+    state: started
