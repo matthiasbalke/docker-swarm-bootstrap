@@ -1,0 +1,4 @@
+---
+- name: create docker swarm
+  shell: >
+    docker swarm init --advertise-addr {{ hostvars[groups.manager.0].ansible_default_ipv4.address }}
