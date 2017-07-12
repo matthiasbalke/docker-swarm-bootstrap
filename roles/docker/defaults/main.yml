@@ -1,0 +1,3 @@
+---
+# default variables, will be overrided by every other method
+dockerVersion: 17.06.0.ce-1.el7.centos

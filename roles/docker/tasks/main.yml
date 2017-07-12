@@ -26,7 +26,7 @@
 
 - name: Install Docker
   yum:
-    name: docker-ce-17.06.0.ce-1.el7.centos
+    name: docker-ce-{{ dockerVersion }}
     state: present
     update_cache: True
 
